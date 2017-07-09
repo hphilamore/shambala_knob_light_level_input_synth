@@ -49,14 +49,14 @@ const int MAX_CARRIER_FREQ = 440;
 const int MIN_INTENSITY = 700;
 const int MAX_INTENSITY = 400;
 
-const int MIN_RATIO = 500;
+const int MIN_RATIO = 1;
 const int MAX_RATIO = 10;
 
 AutoMap kMapCarrierFreq(0,1023,MIN_CARRIER_FREQ,MAX_CARRIER_FREQ);
 AutoMap kMapIntensity(0,1023,MIN_INTENSITY,MAX_INTENSITY);
 //AutoMap cap34Intensity(-4000, 4000, MIN_INTENSITY,MAX_INTENSITY);
 AutoMap cap34Intensity(-1000, 1000, MIN_INTENSITY,MAX_INTENSITY);
-AutoMap cap56Ratio(1, 10, MIN_RATIO,MAX_RATIO);
+AutoMap cap56Ratio(0, 600, MIN_RATIO, MAX_RATIO);
 
 const int KNOB_PIN = 0; // set the input for the knob to analog pin 0
 const int LDR_PIN = 1; // set the input for the LDR to analog pin 1
@@ -71,7 +71,9 @@ RollingAverage <int, 8> jAverage; // how_many_to_average has to be power of 2
 Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aCarrier(COS2048_DATA);
 Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aModulator(COS2048_DATA);
 
-int mod_ratio = 10;//3;//10; // 3; // harmonics
+//int mod_ratio = 10;//3;//10; // 3; // harmonics
+
+
 long fm_intensity; // carries control info from updateControl() to updateAudio()
 long fm_intensity_R; // carries control info from updateControl() to updateAudio()
 long fm_intensity_C; // carries control info from updateControl() to updateAudio()
@@ -106,7 +108,8 @@ void updateControl(){
 
   // map the knob to carrier frequency
   int carrier_freq = kMapCarrierFreq(knob_value);
-  
+
+    int mod_ratio = cap56Ratio(cs56av);
   //calculate the modulation frequency to stay in ratio
   int mod_freq = carrier_freq * mod_ratio;
   
@@ -121,7 +124,7 @@ void updateControl(){
   //Serial.print("light_level = "); 
   //Serial.print(light_level); 
   //Serial.print("\t"); // prints a tab
-  
+
   fm_intensity_R = kMapIntensity(light_level);
   fm_intensity_C = cap34Intensity(cs34av) ;
   
@@ -142,8 +145,12 @@ void updateControl(){
   Serial.print("\t");
   Serial.print(fm_intensity_C);
    Serial.print("\t");
-  Serial.println(cs56av);
-  //Serial.println("  ");
+  Serial.print(cs56av);
+     Serial.print("\t");
+  Serial.print(carrier_freq);
+       Serial.print("\t");
+  Serial.print(mod_ratio);
+  Serial.println("  ");
   
   
 //  Serial.print("\t");
