@@ -34,6 +34,8 @@
 #include <Oscil.h> // oscillator 
 #include <tables/cos2048_int8.h> // table for Oscils to play
 #include <AutoMap.h> // maps unpredictable inputs to a range
+#include <CapacitiveSensor.h>
+#include <RollingAverage.h>
  
 // desired carrier frequency max and min, for AutoMap
 const int MIN_CARRIER_FREQ = 22;
@@ -49,6 +51,13 @@ AutoMap kMapIntensity(0,1023,MIN_INTENSITY,MAX_INTENSITY);
 const int KNOB_PIN = 0; // set the input for the knob to analog pin 0
 const int LDR_PIN = 1; // set the input for the LDR to analog pin 1
 
+CapacitiveSensor   cs_3_4 = CapacitiveSensor(3,4);        // 10M resistor between pins 4 & 2, pin 2 is sensor pin, add a wire and or foil if desired
+CapacitiveSensor   cs_5_6 = CapacitiveSensor(5,6);        // 10M resistor between pins 4 & 6, pin 6 is sensor pin, add a wire and or foil
+CapacitiveSensor   cs_7_8 = CapacitiveSensor(7,8);        // 10M resistor between pins 4 & 8, pin 8 is sensor pin, add a wire and or foil
+//RollingAverage <int, 32> kAverage; // how_many_to_average has to be power of 2
+RollingAverage <int, 8> kAverage; // how_many_to_average has to be power of 2
+
+
 Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aCarrier(COS2048_DATA);
 Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aModulator(COS2048_DATA);
 
@@ -60,10 +69,26 @@ void setup(){
   //Serial.begin(9600); // for Teensy 3.1, beware printout can cause glitches
   Serial.begin(115200); // set up the Serial output so we can look at the piezo values // set up the Serial output for debugging
   startMozzi(); // :))
+  cs_3_4.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate on channel 1 - just as an example
+  cs_5_6.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate on channel 1 - just as an example
+  cs_7_8.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate on channel 1 - just as an example
+  
 }
 
 
 void updateControl(){
+  // read the cap sense
+//  long cs34 =  cs_3_4.capacitiveSensor(1);
+//  long cs56 =  cs_5_6.capacitiveSensor(1);
+//  long cs78 =  cs_7_8.capacitiveSensor(1);
+  int cs34 =  int(cs_3_4.capacitiveSensor(10));
+//  int cs56 =  int(cs_5_6.capacitiveSensor(10));
+//  int cs78 =  int(cs_7_8.capacitiveSensor(10));
+  int cs34av =  kAverage.next(cs34);
+//  int cs56av =  kAverage.next(cs56);
+//  int cs78av =  kAverage.next(cs78);
+
+  
   // read the knob
   int knob_value = mozziAnalogRead(KNOB_PIN); // value is 0-1023
 
@@ -96,11 +121,20 @@ void updateControl(){
 //  Serial.print("\t");
   //Serial.println(); // print a carraige return for the next line of debugging info
 
+  Serial.println(cs34av);
+  //Serial.print("\t");
+//  Serial.print(cs56av);
+//  Serial.print("\t");
+//  Serial.print(cs78av);
+//  Serial.print("\t");
+  //Serial.println(); // 
+
+
 }
 
 int updateAudio(){
   long modulation = fm_intensity * aModulator.next(); 
-  Serial.println(modulation);
+  //erial.println(modulation);
   return aCarrier.phMod(modulation); // phMod does the FM
 }
 
