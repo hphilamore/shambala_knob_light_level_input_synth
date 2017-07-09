@@ -42,11 +42,17 @@ const int MIN_CARRIER_FREQ = 22;
 const int MAX_CARRIER_FREQ = 440;
 
 // desired intensity max and min, for AutoMap, note they're inverted for reverse dynamics
-const int MIN_INTENSITY = 700;
+//const int MIN_INTENSITY = 700;
+//const int MAX_INTENSITY = 10;
+//const int MIN_INTENSITY = 700;
+//const int MAX_INTENSITY = 10;
+const int MIN_INTENSITY = 500;
 const int MAX_INTENSITY = 10;
 
 AutoMap kMapCarrierFreq(0,1023,MIN_CARRIER_FREQ,MAX_CARRIER_FREQ);
 AutoMap kMapIntensity(0,1023,MIN_INTENSITY,MAX_INTENSITY);
+//AutoMap cap34Intensity(-4000, 4000, MIN_INTENSITY,MAX_INTENSITY);
+AutoMap cap34Intensity(800, 2000, MIN_INTENSITY,MAX_INTENSITY);
 
 const int KNOB_PIN = 0; // set the input for the knob to analog pin 0
 const int LDR_PIN = 1; // set the input for the LDR to analog pin 1
@@ -63,6 +69,8 @@ Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aModulator(COS2048_DATA);
 
 int mod_ratio = 3;//10; // 3; // harmonics
 long fm_intensity; // carries control info from updateControl() to updateAudio()
+long fm_intensity_R; // carries control info from updateControl() to updateAudio()
+long fm_intensity_C; // carries control info from updateControl() to updateAudio()
 
 
 void setup(){
@@ -78,10 +86,10 @@ void setup(){
 
 void updateControl(){
   // read the cap sense
-//  long cs34 =  cs_3_4.capacitiveSensor(1);
+  //long cs34 =  cs_3_4.capacitiveSensor(1);
 //  long cs56 =  cs_5_6.capacitiveSensor(1);
 //  long cs78 =  cs_7_8.capacitiveSensor(1);
-  int cs34 =  int(cs_3_4.capacitiveSensor(10));
+  int cs34 =  int(cs_3_4.capacitiveSensor(1));
 //  int cs56 =  int(cs_5_6.capacitiveSensor(10));
 //  int cs78 =  int(cs_7_8.capacitiveSensor(10));
   int cs34av =  kAverage.next(cs34);
@@ -110,7 +118,8 @@ void updateControl(){
   //Serial.print(light_level); 
   //Serial.print("\t"); // prints a tab
   
-  fm_intensity = kMapIntensity(light_level);
+  fm_intensity_R = kMapIntensity(light_level);
+  fm_intensity_C = cap34Intensity(cs34av) ;
   
   //Serial.print("fm_intensity = ");
 //  Serial.print(carrier_freq);
@@ -121,9 +130,12 @@ void updateControl(){
 //  Serial.print("\t");
   //Serial.println(); // print a carraige return for the next line of debugging info
 
-  Serial.println(cs34av);
-  //Serial.print("\t");
-//  Serial.print(cs56av);
+  Serial.print(cs34av);
+  Serial.print("\t");
+  Serial.print(fm_intensity_R);
+  Serial.print("\t");
+  Serial.println(fm_intensity_C);
+  
 //  Serial.print("\t");
 //  Serial.print(cs78av);
 //  Serial.print("\t");
@@ -133,7 +145,7 @@ void updateControl(){
 }
 
 int updateAudio(){
-  long modulation = fm_intensity * aModulator.next(); 
+  long modulation = fm_intensity_C * aModulator.next(); 
   //erial.println(modulation);
   return aCarrier.phMod(modulation); // phMod does the FM
 }
