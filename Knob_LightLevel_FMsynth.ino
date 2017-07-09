@@ -106,10 +106,39 @@ void updateControl(){
   // read the knob
   int knob_value = mozziAnalogRead(KNOB_PIN); // value is 0-1023
 
-  // map the knob to carrier frequency
-  int carrier_freq = kMapCarrierFreq(knob_value);
+//  // map the knob to carrier frequency
+//  int carrier_freq = kMapCarrierFreq(knob_value);
+//
+//    int mod_ratio = cap56Ratio(cs56av);
+//  //calculate the modulation frequency to stay in ratio
+//  int mod_freq = carrier_freq * mod_ratio;
+//  
+//  // set the FM oscillator frequencies to the calculated values
+//  aCarrier.setFreq(carrier_freq); 
+//  aModulator.setFreq(mod_freq);
+//  
+//  // read the light dependent resistor on the Analog input pin
+//  int light_level= mozziAnalogRead(LDR_PIN); // value is 0-1023
+//  
+//  // print the value to the Serial monitor for debugging
+//  //Serial.print("light_level = "); 
+//  //Serial.print(light_level); 
+//  //Serial.print("\t"); // prints a tab
+//
+//  fm_intensity_R = kMapIntensity(light_level);
+//  fm_intensity_C = cap34Intensity(cs34av) ;
 
-    int mod_ratio = cap56Ratio(cs56av);
+// map the knob to carrier frequency
+  int light_level= mozziAnalogRead(LDR_PIN); // value is 0-1023
+  //int carrier_freq = kMapCarrierFreq(knob_value);
+  int carrier_freq = kMapCarrierFreq(cs34av);
+  int mod_ratio = cap56Ratio(cs56av);
+  
+  fm_intensity_R = kMapIntensity(light_level);
+  //fm_intensity_C = cap34Intensity(cs34av) ;
+  fm_intensity_C = cap34Intensity(knob_value) ;
+
+  
   //calculate the modulation frequency to stay in ratio
   int mod_freq = carrier_freq * mod_ratio;
   
@@ -118,15 +147,14 @@ void updateControl(){
   aModulator.setFreq(mod_freq);
   
   // read the light dependent resistor on the Analog input pin
-  int light_level= mozziAnalogRead(LDR_PIN); // value is 0-1023
+  
   
   // print the value to the Serial monitor for debugging
   //Serial.print("light_level = "); 
   //Serial.print(light_level); 
   //Serial.print("\t"); // prints a tab
 
-  fm_intensity_R = kMapIntensity(light_level);
-  fm_intensity_C = cap34Intensity(cs34av) ;
+  
   
   //Serial.print("fm_intensity = ");
 //  Serial.print(carrier_freq);
