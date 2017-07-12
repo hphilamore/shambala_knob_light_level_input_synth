@@ -50,7 +50,7 @@ const int MIN_INTENSITY = 700;
 const int MAX_INTENSITY = 400;
 
 const int MIN_RATIO = 1;
-const int MAX_RATIO = 10;
+const int MAX_RATIO = 20;//10;
 
 AutoMap kMapCarrierFreq(0,1023,MIN_CARRIER_FREQ,MAX_CARRIER_FREQ);
 AutoMap kMapIntensity(0,1023,MIN_INTENSITY,MAX_INTENSITY);
@@ -136,7 +136,7 @@ void updateControl(){
   
   fm_intensity_R = kMapIntensity(light_level);
   //fm_intensity_C = cap34Intensity(cs34av) ;
-  fm_intensity_C = cap34Intensity(knob_value) ;
+  fm_intensity_C = cap34Intensity(cs34av) ;
 
   
   //calculate the modulation frequency to stay in ratio
